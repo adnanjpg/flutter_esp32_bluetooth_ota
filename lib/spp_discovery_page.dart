@@ -131,7 +131,7 @@ class _DiscoveryPage extends State<DiscoveryPage> {
                       title: const Text('Error occured while bonding'),
                       content: Text("${ex.toString()}"),
                       actions: <Widget>[
-                        FlatButton(
+                        TextButton(
                           child: Text("Close"),
                           onPressed: () {
                             Navigator.of(context).pop();
