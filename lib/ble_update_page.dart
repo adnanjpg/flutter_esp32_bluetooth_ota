@@ -130,143 +130,140 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title!),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            // Text(
-            //   'You have pushed the button this many times:',
-            // ),
-            // Text(
-            //   '$_counter',
-            //   style: Theme.of(context).textTheme.headline4,
-            // ),
-            MaterialButton(
-                color: _deviceConnected ? Colors.red : Colors.grey,
-                child: Text("연결 종료"),
-                onPressed: () async {
-                  if (_deviceConnected) {
-                    bluetoothDevice.disconnect();
-                  }
-                }),
-            SizedBox(
-              height: 24,
-            ),
-            ElevatedButton(
-                child: Text("Mtu 설정"),
-                onPressed: () async {
-                  await bluetoothDevice.requestMtu(chunkSize);
-                }),
+      body: ListView(
+        children: <Widget>[
+          // Text(
+          //   'You have pushed the button this many times:',
+          // ),
+          // Text(
+          //   '$_counter',
+          //   style: Theme.of(context).textTheme.headline4,
+          // ),
+          MaterialButton(
+              color: _deviceConnected ? Colors.red : Colors.grey,
+              child: Text("연결 종료"),
+              onPressed: () async {
+                if (_deviceConnected) {
+                  bluetoothDevice.disconnect();
+                }
+              }),
+          SizedBox(
+            height: 24,
+          ),
+          ElevatedButton(
+              child: Text("Mtu 설정"),
+              onPressed: () async {
+                await bluetoothDevice.requestMtu(chunkSize);
+              }),
 
-            ElevatedButton(
-                child: Text("PSRAM 세팅"),
-                onPressed: () async {
-                  await binSizeWriteCharacteristic.write([
-                    (totalBinSize >> 24) & 0xFF,
-                    (totalBinSize >> 16) & 0xFF,
-                    (totalBinSize >> 8) & 0xFF,
-                    (totalBinSize) & 0xFF,
-                    (chunksLength.toInt() >> 24) & 0xFF,
-                    (chunksLength.toInt() >> 16) & 0xFF,
-                    (chunksLength.toInt() >> 8) & 0xFF,
-                    (chunksLength.toInt()) & 0xFF,
-                  ]);
-                }),
+          ElevatedButton(
+              child: Text("PSRAM 세팅"),
+              onPressed: () async {
+                await binSizeWriteCharacteristic.write([
+                  (totalBinSize >> 24) & 0xFF,
+                  (totalBinSize >> 16) & 0xFF,
+                  (totalBinSize >> 8) & 0xFF,
+                  (totalBinSize) & 0xFF,
+                  (chunksLength.toInt() >> 24) & 0xFF,
+                  (chunksLength.toInt() >> 16) & 0xFF,
+                  (chunksLength.toInt() >> 8) & 0xFF,
+                  (chunksLength.toInt()) & 0xFF,
+                ]);
+              }),
 
-            ElevatedButton(
-                child: Text("PSRAM 해제"),
-                onPressed: () async {
-                  await binSizeWriteCharacteristic
-                      .write([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-                }),
-            ElevatedButton(
-                child: Text("Index Notify"),
-                onPressed: () async {
-                  await indexNotifyCharacteristic.setNotifyValue(true);
-                  _indexSubscription =
-                      indexNotifyCharacteristic.value.listen((event) {
-                    if (event.length > 0) {
-                      print(event);
-                      int _index = ((event[3] << 24) & 0xff000000) |
-                          ((event[2] << 16) & 0x00ff0000) |
-                          ((event[1] << 8) & 0x0000ff00) |
-                          (event[0] & 0x000000ff);
-                      print("Notify index : $_index");
+          ElevatedButton(
+              child: Text("PSRAM 해제"),
+              onPressed: () async {
+                await binSizeWriteCharacteristic
+                    .write([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+              }),
+          ElevatedButton(
+              child: Text("Index Notify"),
+              onPressed: () async {
+                await indexNotifyCharacteristic.setNotifyValue(true);
+                _indexSubscription =
+                    indexNotifyCharacteristic.value.listen((event) {
+                  if (event.length > 0) {
+                    print(event);
+                    int _index = ((event[3] << 24) & 0xff000000) |
+                        ((event[2] << 16) & 0x00ff0000) |
+                        ((event[1] << 8) & 0x0000ff00) |
+                        (event[0] & 0x000000ff);
+                    print("Notify index : $_index");
 
-                      if (_index == chunksLength.toInt()) {
-                        print(">>> stop _index == chunksLength.toInt()");
-                        endTime = DateTime.now().millisecondsSinceEpoch;
-                        print("총 소요시간: ${endTime - startTime}");
+                    if (_index == chunksLength.toInt()) {
+                      print(">>> stop _index == chunksLength.toInt()");
+                      endTime = DateTime.now().millisecondsSinceEpoch;
+                      print("총 소요시간: ${endTime - startTime}");
 
-                        setState(() {
-                          progressTimeText = (endTime - startTime).toString();
-                        });
-                      } else {
-                        binWriteCharacteristic.write(chunks[_index]);
-                      }
                       setState(() {
-                        _percent = (_index / chunksLength);
-                        progressText = "$_index / $chunksLength";
+                        progressTimeText = (endTime - startTime).toString();
                       });
+                    } else {
+                      binWriteCharacteristic.write(chunks[_index]);
                     }
-                  });
-                }),
-            ElevatedButton(
-                child: Text("보내기"),
-                onPressed: () async {
-                  startTime = DateTime.now().millisecondsSinceEpoch;
-                  await binWriteCharacteristic.write(chunks[0]);
-                  // for (int i = 0; i < chunks.length; i++) {
-                  //   print("인덱스: $i");
-                  //   await Future.delayed(Duration(milliseconds: 10));
-                  //   await binWriteCharacteristic.write(chunks[i]);
-                  //   setState(() {
-                  //     progressText = "$i / $chunksLength";
-                  //   });
-                  // }
-                  // int endTime = DateTime.now().millisecondsSinceEpoch;
-                  // print("총 소요시간: ${endTime - startTime}");
-                  //
-                  // setState(() {
-                  //   progressTimeText = (endTime - startTime).toString();
-                  // });
-                }),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Text(
-                "Now/Total: $progressText",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+                    setState(() {
+                      _percent = (_index / chunksLength);
+                      progressText = "$_index / $chunksLength";
+                    });
+                  }
+                });
+              }),
+          ElevatedButton(
+              child: Text("보내기"),
+              onPressed: () async {
+                startTime = DateTime.now().millisecondsSinceEpoch;
+                await binWriteCharacteristic.write(chunks[0]);
+                // for (int i = 0; i < chunks.length; i++) {
+                //   print("인덱스: $i");
+                //   await Future.delayed(Duration(milliseconds: 10));
+                //   await binWriteCharacteristic.write(chunks[i]);
+                //   setState(() {
+                //     progressText = "$i / $chunksLength";
+                //   });
+                // }
+                // int endTime = DateTime.now().millisecondsSinceEpoch;
+                // print("총 소요시간: ${endTime - startTime}");
+                //
+                // setState(() {
+                //   progressTimeText = (endTime - startTime).toString();
+                // });
+              }),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(
+              "Now/Total: $progressText",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Text(
-                "소요시간(ms): $progressTimeText ms (${chunks.length}조각 $chunkSize) ",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(
+              "소요시간(ms): $progressTimeText ms (${chunks.length}조각 $chunkSize) ",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Text(
-                "소요시간(분): ${((endTime - startTime) ~/ 1000) ~/ 60} 분",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(
+              "소요시간(분): ${((endTime - startTime) ~/ 1000) ~/ 60} 분",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
+          ),
 
-            CircularPercentIndicator(
-              radius: 120.0,
-              lineWidth: 12.0,
-              percent: _percent,
-              center: Text(
-                "${(_percent * 100).toStringAsFixed(1)} %",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+          CircularPercentIndicator(
+            radius: 120.0,
+            lineWidth: 12.0,
+            percent: _percent,
+            center: Text(
+              "${(_percent * 100).toStringAsFixed(1)} %",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
               ),
-              progressColor: Colors.green,
-            )
-          ],
-        ),
+            ),
+            progressColor: Colors.green,
+          )
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
