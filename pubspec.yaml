@@ -24,8 +24,7 @@ dependencies:
 
   flutter_bluetooth_serial:
     git:
-      url: https://github.com/kechankrisna/flutter_bluetooth_serial.git
-      ref: nullable
+      url: git@github.com:edufolly/flutter_bluetooth_serial.git
   flutter_blue:
     git:
       url: https://github.com/pauldemarco/flutter_blue

@@ -1,4 +1,4 @@
-package com.angelrobotics.flutter.flutter_ap_updater
+package com.example.flutter_esp32_bluetooth_ota
 
 import io.flutter.embedding.android.FlutterActivity
 
