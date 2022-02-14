@@ -53,9 +53,10 @@ class _SppUpdatePageState extends State<SppUpdatePage> {
                   title: Text("장치 검색"),
                   onTap: () async {
                     final BluetoothDevice? selectedDevice =
-                        await Navigator.of(context).push(MaterialPageRoute(builder: (context) => DiscoveryPage()));
+                        await Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => DiscoveryPage()));
                     if (selectedDevice != null) {
-                      print('Discovery -> selected ' + selectedDevice.address!);
+                      print('Discovery -> selected ' + selectedDevice.address);
                       _selectedDevice = selectedDevice;
                     } else {
                       print('Discovery -> no device selected');
@@ -65,7 +66,8 @@ class _SppUpdatePageState extends State<SppUpdatePage> {
                 title: Text("장치 연결"),
                 onTap: () async {
                   if (_selectedDevice != null) {
-                    _bluetoothConnection = await BluetoothConnection.toAddress(_selectedDevice!.address);
+                    _bluetoothConnection = await BluetoothConnection.toAddress(
+                        _selectedDevice!.address);
                   } else {
                     print("장치 선택 필요");
                   }
@@ -91,7 +93,8 @@ class _SppUpdatePageState extends State<SppUpdatePage> {
                   for (int i = 0; i < chunks.length; i++) {
                     Future.delayed(Duration(seconds: 1), () async {
                       print("i : ${i} chunks : ${chunks[i]}");
-                      _bluetoothConnection.output.add(Uint8List.fromList(chunks[i]));
+                      _bluetoothConnection.output
+                          .add(Uint8List.fromList(chunks[i]));
                       await _bluetoothConnection.output.allSent;
                     });
                   }

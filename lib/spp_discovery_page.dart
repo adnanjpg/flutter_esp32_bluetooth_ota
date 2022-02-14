@@ -41,10 +41,10 @@ class _DiscoveryPage extends State<DiscoveryPage> {
   void _startDiscovery() {
     _streamSubscription =
         FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
-          setState(() {
-            results.add(r);
-          });
-        });
+      setState(() {
+        results.add(r);
+      });
+    });
 
     _streamSubscription!.onDone(() {
       setState(() {
@@ -73,17 +73,17 @@ class _DiscoveryPage extends State<DiscoveryPage> {
         actions: <Widget>[
           isDiscovering
               ? FittedBox(
-            child: Container(
-              margin: new EdgeInsets.all(16.0),
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            ),
-          )
+                  child: Container(
+                    margin: new EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                )
               : IconButton(
-            icon: Icon(Icons.replay),
-            onPressed: _restartDiscovery,
-          )
+                  icon: Icon(Icons.replay),
+                  onPressed: _restartDiscovery,
+                )
         ],
       ),
       body: ListView.builder(
@@ -91,7 +91,7 @@ class _DiscoveryPage extends State<DiscoveryPage> {
         itemBuilder: (BuildContext context, index) {
           BluetoothDiscoveryResult? result = results[index];
           return BluetoothDeviceListEntry(
-            device: result.device!,
+            device: result.device,
             rssi: result.rssi,
             onTap: () {
               Navigator.of(context).pop(result.device);
@@ -99,24 +99,24 @@ class _DiscoveryPage extends State<DiscoveryPage> {
             onLongPress: () async {
               try {
                 bool bonded = false;
-                if (result.device!.isBonded) {
-                  print('Unbonding from ${result.device!.address}...');
+                if (result.device.isBonded) {
+                  print('Unbonding from ${result.device.address}...');
                   await FlutterBluetoothSerial.instance
-                      .removeDeviceBondWithAddress(result.device!.address!);
-                  print('Unbonding from ${result.device!.address} has succed');
+                      .removeDeviceBondWithAddress(result.device.address);
+                  print('Unbonding from ${result.device.address} has succed');
                 } else {
-                  print('Bonding with ${result.device!.address}...');
+                  print('Bonding with ${result.device.address}...');
                   bonded = (await FlutterBluetoothSerial.instance
-                      .bondDeviceAtAddress(result?.device?.address))!;
+                      .bondDeviceAtAddress(result.device.address))!;
                   print(
-                      'Bonding with ${result.device!.address} has ${bonded ? 'succed' : 'failed'}.');
+                      'Bonding with ${result.device.address} has ${bonded ? 'succed' : 'failed'}.');
                 }
                 setState(() {
                   results[results.indexOf(result)] = BluetoothDiscoveryResult(
                       device: BluetoothDevice(
-                        name: result.device?.name ?? '',
-                        address: result.device?.address,
-                        type: result.device!.type,
+                        name: result.device.name ?? '',
+                        address: result.device.address,
+                        type: result.device.type,
                         bondState: bonded
                             ? BluetoothBondState.bonded
                             : BluetoothBondState.none,
@@ -150,7 +150,6 @@ class _DiscoveryPage extends State<DiscoveryPage> {
   }
 }
 
-
 class BluetoothDeviceListEntry extends ListTile {
   BluetoothDeviceListEntry({
     required BluetoothDevice device,
@@ -159,40 +158,40 @@ class BluetoothDeviceListEntry extends ListTile {
     GestureLongPressCallback? onLongPress,
     bool enabled = true,
   }) : super(
-    onTap: onTap,
-    onLongPress: onLongPress,
-    enabled: enabled,
-    leading:
-    Icon(Icons.devices), // @TODO . !BluetoothClass! class aware icon
-    title: Text(device.name ?? "Unknown device"),
-    subtitle: Text(device.address.toString()),
-    trailing: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        rssi != null
-            ? Container(
-          margin: new EdgeInsets.all(8.0),
-          child: DefaultTextStyle(
-            style: _computeTextStyle(rssi),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(rssi.toString()),
-                Text('dBm'),
-              ],
-            ),
+          onTap: onTap,
+          onLongPress: onLongPress,
+          enabled: enabled,
+          leading:
+              Icon(Icons.devices), // @TODO . !BluetoothClass! class aware icon
+          title: Text(device.name ?? "Unknown device"),
+          subtitle: Text(device.address.toString()),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              rssi != null
+                  ? Container(
+                      margin: new EdgeInsets.all(8.0),
+                      child: DefaultTextStyle(
+                        style: _computeTextStyle(rssi),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(rssi.toString()),
+                            Text('dBm'),
+                          ],
+                        ),
+                      ),
+                    )
+                  : Container(width: 0, height: 0),
+              device.isConnected
+                  ? Icon(Icons.import_export)
+                  : Container(width: 0, height: 0),
+              device.isBonded
+                  ? Icon(Icons.link)
+                  : Container(width: 0, height: 0),
+            ],
           ),
-        )
-            : Container(width: 0, height: 0),
-        device.isConnected
-            ? Icon(Icons.import_export)
-            : Container(width: 0, height: 0),
-        device.isBonded
-            ? Icon(Icons.link)
-            : Container(width: 0, height: 0),
-      ],
-    ),
-  );
+        );
 
   static TextStyle _computeTextStyle(int rssi) {
     /**/ if (rssi >= -35)
