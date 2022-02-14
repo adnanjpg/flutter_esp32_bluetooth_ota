@@ -9,7 +9,7 @@ class DiscoveryPage extends StatefulWidget {
   const DiscoveryPage({this.start = true});
 
   @override
-  _DiscoveryPage createState() => new _DiscoveryPage();
+  _DiscoveryPage createState() => _DiscoveryPage();
 }
 
 class _DiscoveryPage extends State<DiscoveryPage> {
@@ -74,7 +74,7 @@ class _DiscoveryPage extends State<DiscoveryPage> {
           isDiscovering
               ? FittedBox(
                   child: Container(
-                    margin: new EdgeInsets.all(16.0),
+                    margin: EdgeInsets.all(16.0),
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
@@ -131,8 +131,8 @@ class _DiscoveryPage extends State<DiscoveryPage> {
                       title: const Text('Error occured while bonding'),
                       content: Text("${ex.toString()}"),
                       actions: <Widget>[
-                        new FlatButton(
-                          child: new Text("Close"),
+                        FlatButton(
+                          child: Text("Close"),
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
@@ -170,7 +170,7 @@ class BluetoothDeviceListEntry extends ListTile {
             children: <Widget>[
               rssi != null
                   ? Container(
-                      margin: new EdgeInsets.all(8.0),
+                      margin: EdgeInsets.all(8.0),
                       child: DefaultTextStyle(
                         style: _computeTextStyle(rssi),
                         child: Column(
