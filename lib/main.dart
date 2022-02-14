@@ -1,11 +1,5 @@
-import 'dart:async';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_ap_updater/spp_update_page.dart';
-import 'package:flutter_blue/flutter_blue.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'ble_update_page.dart';
 
@@ -55,7 +49,8 @@ class SelectPage extends StatelessWidget {
               ListTile(
                 title: Text("BLUETOOTH UPDATE (TEST)"),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => SppUpdatePage()));
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => SppUpdatePage()));
                 },
               )
             ],

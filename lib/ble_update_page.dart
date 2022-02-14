@@ -16,10 +16,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
   bool _deviceConnected = false;
   late StreamSubscription _scanSubscription;
-  StreamSubscription? _stateSubscription;
   StreamSubscription? _indexSubscription;
 
   FlutterBlue? flutterBlue = FlutterBlue.instance;
@@ -30,17 +28,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   int totalBinSize = 0;
   double _percent = 0.0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
 
   Future getPermission() async {
     if (await Permission.location.request().isGranted) {
@@ -78,7 +65,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getPermission();
     readBinFile().then((value) {
@@ -97,14 +83,20 @@ class _MyHomePageState extends State<MyHomePage> {
           bluetoothDevice.discoverServices().then((value) async {
             for (BluetoothService service in value) {
               print("service: $service");
-              for (BluetoothCharacteristic bluetoothCharacteristic in service.characteristics) {
+              for (BluetoothCharacteristic bluetoothCharacteristic
+                  in service.characteristics) {
                 print("char: ${bluetoothCharacteristic.uuid.toString()}");
-                if (bluetoothCharacteristic.uuid.toString().toLowerCase() == "0000ff01-0000-1000-8000-00805f9b34fb") {
+                if (bluetoothCharacteristic.uuid.toString().toLowerCase() ==
+                    "0000ff01-0000-1000-8000-00805f9b34fb") {
                   binWriteCharacteristic = bluetoothCharacteristic;
-                } else if (bluetoothCharacteristic.uuid.toString().toLowerCase() ==
+                } else if (bluetoothCharacteristic.uuid
+                        .toString()
+                        .toLowerCase() ==
                     "0000ff03-0000-1000-8000-00805f9b34fb") {
                   binSizeWriteCharacteristic = bluetoothCharacteristic;
-                } else if (bluetoothCharacteristic.uuid.toString().toLowerCase() ==
+                } else if (bluetoothCharacteristic.uuid
+                        .toString()
+                        .toLowerCase() ==
                     "0000ff02-0000-1000-8000-00805f9b34fb") {
                   indexNotifyCharacteristic = bluetoothCharacteristic;
                 }
@@ -119,7 +111,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _scanSubscription.cancel();
     _indexSubscription?.cancel();
 
@@ -185,13 +176,15 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
                 child: Text("PSRAM 해제"),
                 onPressed: () async {
-                  await binSizeWriteCharacteristic.write([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+                  await binSizeWriteCharacteristic
+                      .write([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
                 }),
             ElevatedButton(
                 child: Text("Index Notify"),
                 onPressed: () async {
                   await indexNotifyCharacteristic.setNotifyValue(true);
-                  _indexSubscription = indexNotifyCharacteristic.value.listen((event) {
+                  _indexSubscription =
+                      indexNotifyCharacteristic.value.listen((event) {
                     if (event.length > 0) {
                       print(event);
                       int _index = ((event[3] << 24) & 0xff000000) |

@@ -15,12 +15,6 @@ class _SppUpdatePageState extends State<SppUpdatePage> {
   BluetoothDevice? _selectedDevice;
   late BluetoothConnection _bluetoothConnection;
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
   late Uint8List binDate;
 
   var chunks = [];
